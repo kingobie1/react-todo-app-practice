@@ -27,14 +27,9 @@ class Todo extends React.Component {
 
         const cookies = new Cookies();
         let items = cookies.get('items');
-        // if (!(items.constructor === Array)) {
-        //     items = [
-        //         {desc: "todo 1", isComplete: false},
-        //         {desc: "todo 2", isComplete: false},
-        //         {desc: "todo 3", isComplete: false},
-        //         {desc: "todo 4", isComplete: false},
-        //     ]
-        // }
+        if (typeof items == 'undefined') {
+            items = [];
+        }
 
         this.state = {
             items: items,
@@ -42,7 +37,19 @@ class Todo extends React.Component {
     }
 
     generateRenderItemListItem(items, fx) {
-        return items.map(function(item){
+        return items.filter(i => !i.isComplete).map(function(item){
+            return  (
+                <Item
+                    desc={item.desc}
+                    isComplete={item.isComplete}
+                    functionOnClick={() => fx(item)}
+                />
+            );
+        });
+    }
+
+    generateRenderDoneItemListItem(items, fx) {
+        return items.filter(i => i.isComplete).map(function(item){
             return  (
                 <Item
                     desc={item.desc}
@@ -72,6 +79,11 @@ class Todo extends React.Component {
         this.setState({items: items});
     }
 
+    clearCompleted() {
+        let items = this.state.items.slice();
+        this.setState({items: items.filter(i => !i.isComplete)});
+    }
+
     handleItemSubmittedFromForm(itemDescription) {
         this.addItem(itemDescription);
     }
@@ -88,8 +100,11 @@ class Todo extends React.Component {
 
     render() {
         var itemsList = this.generateRenderItemListItem(this.state.items, (item) => this.handleItemClick(item));
+        var doneItemsList = this.generateRenderDoneItemListItem(this.state.items, (item) => this.handleItemClick(item));
+
         return (
-            <div className="list">
+            <div id="container">
+                <h1>To-Do List</h1>
                 <TextForm
                     submitItem={(itemDescription) => this.handleItemSubmittedFromForm(itemDescription)}
                 />
@@ -97,6 +112,12 @@ class Todo extends React.Component {
                 <ul>
                     {itemsList}
                 </ul>
+
+                <h2>Completed</h2>
+                <button onClick={() => this.clearCompleted()}>clear</button>
+                <u>
+                    {doneItemsList}
+                </u>
             </div>
         );
     }
