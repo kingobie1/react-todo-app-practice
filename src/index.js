@@ -20,9 +20,9 @@ class Todo extends React.Component {
         this.state = {
             items: [
                 {desc: "todo 1", isComplete: false},
-                {desc: "todo 2", isComplete: true},
-                {desc: "todo 3", isComplete: true},
-                {desc: "todo 4", isComplete: true},
+                {desc: "todo 2", isComplete: false},
+                {desc: "todo 3", isComplete: false},
+                {desc: "todo 4", isComplete: false},
             ],
         };
     }
@@ -40,22 +40,80 @@ class Todo extends React.Component {
     }
 
     handleItemClick(itemData) {
-        // let i = this.state.items.findIndex(itemData);
-        let i = this.state.items.indexOf(itemData);
-        const items = this.state.items.slice();
-        let item = items[i];
+        this.toggleCompleted(itemData);
+    }
+
+    toggleCompleted(itemToToggle) {
+        let i = this.state.items.indexOf(itemToToggle);
+        let items = this.state.items.slice();
+        let item = items[i]; // pass by reference for arrays
         item.isComplete = !item.isComplete;
-        this.setState({item: items});
+        this.setState({items: items});
+    }
+
+    addItem(itemDescription) {
+        // get items
+        let items = this.state.items.slice();
+        // add items
+        const newItem = {desc: itemDescription, isComplete: false};
+        items.push(newItem);
+        // set state
+        this.setState({items: items});
+    }
+
+    handleItemSubmittedFromForm(itemDescription) {
+        this.addItem(itemDescription);
+
+        // alert('A name was submitted: ' + this.state.value);
     }
 
     render() {
         var itemsList = this.generateRenderItemListItem(this.state.items, (item) => this.handleItemClick(item));
         return (
             <div className="list">
+                <TextForm
+                    submitItem={(itemDescription) => this.handleItemSubmittedFromForm(itemDescription)}
+                />
+
                 <ul>
                     {itemsList}
                 </ul>
             </div>
+        );
+    }
+}
+
+class TextForm extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {value: ''};
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
+    }
+
+    handleChange(event) {
+        this.setState({value: event.target.value});
+    }
+
+    handleSubmit(event) {
+        this.props.submitItem(this.state.value);
+        this.clearInput();
+        event.preventDefault();
+    }
+
+    clearInput() {
+        this.setState({value: ''});
+    }
+
+    render() {
+        return (
+            <form onSubmit={this.handleSubmit}>
+                <label>
+                    <input type="text" value={this.state.value} onChange={this.handleChange} />
+                </label>
+                <input type="submit" value="Submit" />
+            </form>
         );
     }
 }
