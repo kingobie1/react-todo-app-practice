@@ -1,6 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import Cookies from 'universal-cookie';
+
+/*
+    resources:
+        REACT tutorial - https://reactjs.org/tutorial/tutorial.html
+        REACT input - https://reactjs.org/docs/forms.html
+ */
 
 class Item extends React.Component {
     render() {
@@ -17,13 +24,20 @@ class Item extends React.Component {
 class Todo extends React.Component {
     constructor(props) {
         super(props);
+
+        const cookies = new Cookies();
+        let items = cookies.get('items');
+        // if (!(items.constructor === Array)) {
+        //     items = [
+        //         {desc: "todo 1", isComplete: false},
+        //         {desc: "todo 2", isComplete: false},
+        //         {desc: "todo 3", isComplete: false},
+        //         {desc: "todo 4", isComplete: false},
+        //     ]
+        // }
+
         this.state = {
-            items: [
-                {desc: "todo 1", isComplete: false},
-                {desc: "todo 2", isComplete: false},
-                {desc: "todo 3", isComplete: false},
-                {desc: "todo 4", isComplete: false},
-            ],
+            items: items,
         };
     }
 
@@ -46,25 +60,30 @@ class Todo extends React.Component {
     toggleCompleted(itemToToggle) {
         let i = this.state.items.indexOf(itemToToggle);
         let items = this.state.items.slice();
-        let item = items[i]; // pass by reference for arrays
+        let item = items[i]; // pass by reference for arrays.
         item.isComplete = !item.isComplete;
         this.setState({items: items});
     }
 
     addItem(itemDescription) {
-        // get items
         let items = this.state.items.slice();
-        // add items
         const newItem = {desc: itemDescription, isComplete: false};
         items.push(newItem);
-        // set state
         this.setState({items: items});
     }
 
     handleItemSubmittedFromForm(itemDescription) {
         this.addItem(itemDescription);
+    }
 
-        // alert('A name was submitted: ' + this.state.value);
+    componentDidUpdate() {
+        this.saveCookie();
+    }
+
+    saveCookie() {
+        const cookies = new Cookies();
+        cookies.set('items', this.state.items, { path: '/' });
+        console.log(cookies.get('items'));
     }
 
     render() {
